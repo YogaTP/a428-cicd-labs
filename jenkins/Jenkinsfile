@@ -26,7 +26,12 @@ pipeline {
         }
         stage('Deploy') {
             steps {
-                sh 'npx --yes serve -s build -l 3000 & sleep 60; kill %1'
+                sh '''
+                    npx --yes serve -s build -l 3000 &
+                    SERVE_PID=$!
+                    sleep 60
+                    kill $SERVE_PID
+                '''
             }
         }
     }
