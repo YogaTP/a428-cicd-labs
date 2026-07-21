@@ -2,7 +2,7 @@ pipeline {
     agent {
         docker {
             image 'node:lts-buster-slim'
-            args '-e HOME=/tmp'
+            args '-e HOME=/tmp -p 3000:3000'
         }
     }
     stages {
@@ -15,6 +15,19 @@ pipeline {
         stage('Test') {
             steps {
                 sh 'NODE_OPTIONS=--openssl-legacy-provider npm test -- --watchAll=false'
+            }
+        }
+        stage('Manual Approval') {
+            steps {
+                script {
+                    input message: 'Lanjutkan ke tahap Deploy?', ok: 'Proceed'
+                }
+            }
+        }
+        stage('Deploy') {
+            steps {
+                sh 'npm install -g serve'
+                sh 'serve -s build -l 3000 & sleep 60; kill %1'
             }
         }
     }
